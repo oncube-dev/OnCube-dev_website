@@ -1,0 +1,31 @@
+body {
+    background: #f5f5f5;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.timer-container {
+    background: #fff;
+    padding: 40px 60px;
+    border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    text-align: center;
+}
+
+.timer-container h1 {
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+#timer {
+    font-size: 3.5rem;
+    font-weight: bold;
+    margin-top: 210px;
+    color: #333;
+    letter-spacing: 1px;
+} 
