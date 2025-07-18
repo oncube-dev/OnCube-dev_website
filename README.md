@@ -1,14 +1,17 @@
-# Timer from Poli Video
+# Timer from PolimerS's Video
 
 Веб-сайт на Python, отображающий таймер в формате: "XX дней, XX часов, XX минут, XX секунд". Таймер отсчитывает время с последнего выхода видео PolimerS
 
 ## Структура проекта
 
-- `app/` — исходный код приложения
-  - `static/` — статические файлы (CSS, JS)
-  - `templates/` — HTML-шаблоны
-- `tests/` — тесты (если понадобятся)
-- `requirements.txt` — зависимости проекта
-- `.gitignore` — игнорируемые файлы (уже есть)
-- `LICENSE` — лицензия (уже есть)
-- `README.md` — описание проекта 
+- `app/` — 
+  - `app/`
+    - `static/` — 
+    - `templates/` 
+    - `__init__.py`
+    - `main.py`
+  - `requirements.txt`
+  - `.gitignore`  
+- `.gitignore` 
+- `LICENSE` 
+- `README.md`  
