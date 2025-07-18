@@ -51,6 +51,7 @@ body {
     text-decoration: underline;
 }
 
+/* Кнопка переключения темы */
 .theme-toggle-btn {
     position: fixed;
     right: 24px;
@@ -72,6 +73,7 @@ body {
     color: #23262f;
 }
 
+/* Светлая тема по умолчанию */
 body {
     background: #f5f5f5;
     color: #23262f;
@@ -94,6 +96,7 @@ body {
     color: #1976d2;
 }
 
+/* Тёмная тема */
 body.dark-theme {
     background: #181a20;
     color: #f1f1f1;
