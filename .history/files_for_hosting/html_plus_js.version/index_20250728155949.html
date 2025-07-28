@@ -44,7 +44,7 @@
         }
     </style>
 </head>
-<body class="dark-theme">
+<body>
     <div id="auth-container" style="display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; position:relative;">
         <h1>🛠👨‍💻ВЕДУТСЯ ТЕХНИЧЕСКИЕ РАБОТЫ👨‍💻🛠</h1>
         <input type="password" id="password-input" placeholder="Пароль" style="padding:8px; font-size:1.1em; margin-bottom:10px; border-radius:6px; border:1px solid #ccc;">
@@ -62,7 +62,6 @@
         Все права на представленный контент принадлежат <a href="https://www.youtube.com/@PolimerS" target="_blank" style="text-decoration:underline;">PolimerS</a> & <a href="https://github.com/oncube-dev" target="_blank" style="text-decoration:underline;">Oncube</a> ⋅ Сайт сделал <a href="https://vobi.bio.link/" target="_blank" style="text-decoration:underline;">Vobi</a> с любовью 💚
     </footer>
     <div id="auth-copyright">[2025-2025] © Open-source project licensed under Apache-2.0. All rights reserved.</div>
-    <script src="info_script.js"></script>
     <script>
 
         let startDate = null;
@@ -127,8 +126,6 @@
         const darkClass = 'dark-theme';
         let themePref = localStorage.getItem('theme');
         let isDark = themePref === null ? true : themePref === 'dark';
-        // Если темы нет в localStorage, сразу записываем 'dark' для единообразия
-        if (themePref === null) localStorage.setItem('theme', 'dark');
         setTheme(isDark);
         toggleBtn.onclick = () => {
             isDark = !isDark;
@@ -152,11 +149,31 @@
         const loginBtn = document.getElementById('login-btn');
         const passwordInput = document.getElementById('password-input');
         const authError = document.getElementById('auth-error');
-        function tryLogin() {
-            if (passwordInput.value === AUTH_PASSWORD) {
-                authContainer.style.display = 'none';
-                mainContent.style.display = '';
-            } else {
+        function loadInfoScript() {
+            const s = document.createElement('script');
+            s.src = 'info_script.js';
+            document.body.appendChild(s);
+        }
+        async function tryLogin() {
+            authError.style.display = 'none';
+            const password = passwordInput.value;
+            try {
+                const response = await fetch('http://localhost:5000/check_password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password })
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success) {
+                        authContainer.style.display = 'none';
+                        mainContent.style.display = '';
+                        loadInfoScript();
+                        return;
+                    }
+                }
+                throw new Error('Неверный пароль');
+            } catch (e) {
                 authError.style.display = 'block';
                 passwordInput.value = '';
                 passwordInput.focus();

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Полимер, когда видео?</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body { transition: background 0.2s, color 0.2s; }
+        #auth-copyright {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 24px;
+            text-align: center;
+            font-size: 0.85em;
+            color: #888;
+            width: 100%;
+            pointer-events: none;
+        }
+        .footer-note {
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 45px;
+            text-align: center;
+            font-size: 0.95em;
+            color: #888;
+            width: 100vw;
+            z-index: 101;
+            background: none;
+            pointer-events: none;
+        }
+        #auth-copyright {
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 18px;
+            text-align: center;
+            font-size: 0.85em;
+            color: #888;
+            width: 100vw;
+            pointer-events: none;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+    <div id="auth-container" style="display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; position:relative;">
+        <h1>🛠👨‍💻ВЕДУТСЯ ТЕХНИЧЕСКИЕ РАБОТЫ👨‍💻🛠</h1>
+        <input type="password" id="password-input" placeholder="Пароль" style="padding:8px; font-size:1.1em; margin-bottom:10px; border-radius:6px; border:1px solid #ccc;">
+        <button id="login-btn" style="padding:8px 18px; font-size:1.1em; border-radius:6px; border:none; background:#23262f; color:#fff; cursor:pointer;">Войти</button>
+        <div id="auth-error" style="color:#d32f2f; margin-top:10px; display:none;">Неверный пароль!</div>
+    </div>
+    <button id="theme-toggle" class="theme-toggle-btn" title="Переключить тему">🌙</button>
+    <div id="main-content" style="display:none;">
+        <div class="timer-container">
+            <h1>С момента выхода последнего видео PolimerS прошло:</h1>
+            <div id="timer">Загрузка...</div>
+        </div>
+    </div>
+    <footer class="footer-note">
+        Все права на представленный контент принадлежат <a href="https://www.youtube.com/@PolimerS" target="_blank" style="text-decoration:underline;">PolimerS</a> & <a href="https://github.com/oncube-dev" target="_blank" style="text-decoration:underline;">Oncube</a> ⋅ Сайт сделал <a href="https://vobi.bio.link/" target="_blank" style="text-decoration:underline;">Vobi</a> с любовью 💚
+    </footer>
+    <div id="auth-copyright">[2025-2025] © Open-source project licensed under Apache-2.0. All rights reserved.</div>
+    <script src="password.js"></script>
+    <script>
+        const authContainer = document.getElementById('auth-container');
+        const mainContent = document.getElementById('main-content');
+        const loginBtn = document.getElementById('login-btn');
+        const passwordInput = document.getElementById('password-input');
+        const authError = document.getElementById('auth-error');
+        function loadInfoScript() {
+            const s = document.createElement('script');
+            s.src = 'info_script.js';
+            document.body.appendChild(s);
+        }
+        function tryLogin() {
+            if (typeof AUTH_PASSWORD !== 'undefined' && passwordInput.value === AUTH_PASSWORD) {
+                authContainer.style.display = 'none';
+                mainContent.style.display = '';
+                loadInfoScript();
+            } else {
+                authError.style.display = 'block';
+                passwordInput.value = '';
+                passwordInput.focus();
+            }
+        }
+        loginBtn.onclick = tryLogin;
+        passwordInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') tryLogin();
+        });
+    </script>
+</body>
+</html>

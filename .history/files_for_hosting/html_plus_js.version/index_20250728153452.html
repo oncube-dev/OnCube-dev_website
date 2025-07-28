@@ -44,7 +44,7 @@
         }
     </style>
 </head>
-<body class="dark-theme">
+<body>
     <div id="auth-container" style="display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; position:relative;">
         <h1>🛠👨‍💻ВЕДУТСЯ ТЕХНИЧЕСКИЕ РАБОТЫ👨‍💻🛠</h1>
         <input type="password" id="password-input" placeholder="Пароль" style="padding:8px; font-size:1.1em; margin-bottom:10px; border-radius:6px; border:1px solid #ccc;">
@@ -64,6 +64,7 @@
     <div id="auth-copyright">[2025-2025] © Open-source project licensed under Apache-2.0. All rights reserved.</div>
     <script src="info_script.js"></script>
     <script>
+        const CHANNEL_ID = 'UCACwRQLU0Bq5yxijfnBPRfQ';
 
         let startDate = null;
 
@@ -127,8 +128,6 @@
         const darkClass = 'dark-theme';
         let themePref = localStorage.getItem('theme');
         let isDark = themePref === null ? true : themePref === 'dark';
-        // Если темы нет в localStorage, сразу записываем 'dark' для единообразия
-        if (themePref === null) localStorage.setItem('theme', 'dark');
         setTheme(isDark);
         toggleBtn.onclick = () => {
             isDark = !isDark;

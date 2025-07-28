@@ -62,7 +62,6 @@
         Все права на представленный контент принадлежат <a href="https://www.youtube.com/@PolimerS" target="_blank" style="text-decoration:underline;">PolimerS</a> & <a href="https://github.com/oncube-dev" target="_blank" style="text-decoration:underline;">Oncube</a> ⋅ Сайт сделал <a href="https://vobi.bio.link/" target="_blank" style="text-decoration:underline;">Vobi</a> с любовью 💚
     </footer>
     <div id="auth-copyright">[2025-2025] © Open-source project licensed under Apache-2.0. All rights reserved.</div>
-    <script src="info_script.js"></script>
     <script>
 
         let startDate = null;
@@ -156,6 +155,7 @@
             if (passwordInput.value === AUTH_PASSWORD) {
                 authContainer.style.display = 'none';
                 mainContent.style.display = '';
+                loadInfoScript();
             } else {
                 authError.style.display = 'block';
                 passwordInput.value = '';
@@ -167,6 +167,12 @@
             if (e.key === 'Enter') tryLogin();
         });
 
+        // Динамическая загрузка info_script.js
+        function loadInfoScript() {
+            const s = document.createElement('script');
+            s.src = 'info_script.js';
+            document.body.appendChild(s);
+        }
     </script>
 </body>
 </html>
