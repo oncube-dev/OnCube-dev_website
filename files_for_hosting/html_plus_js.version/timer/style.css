@@ -236,7 +236,7 @@ body {
         font-size: 1.5rem;
         left: 20px;
         bottom: 12px;
-        z-index: 100;
+        z-index: 300;
     }
 
     .moving-gradient {
@@ -281,7 +281,8 @@ body {
         height: 40px;
         font-size: 1.3rem;
         left: 16px;
-        bottom: 8px;
+        bottom: 85px;
+        z-index: 300;
     }
 
     .moving-gradient {

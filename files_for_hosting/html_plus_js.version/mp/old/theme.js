@@ -107,7 +107,6 @@ if (!localStorage.getItem('keyboardHintShown')) {
             box-shadow: 0 4px 20px rgba(0,0,0,0.2);
             animation: slideIn 0.3s ease;
         `;
-        notification.textContent = '💡 Совет: Alt+T для переключения темы';
         
         // Добавляем CSS анимацию
         const style = document.createElement('style');
