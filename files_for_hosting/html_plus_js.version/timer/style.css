@@ -7,9 +7,9 @@ body {
     height: 100vh;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: center; 
 }
-
+#1
 .timer-container {
     background: #23262f;
     padding: 40px 60px;

@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let themePref = localStorage.getItem('theme');
     let isDark = themePref === null ? true : themePref === 'dark';
     
-    // Если темы нет в localStorage, сразу записываем 'dark' для единообразия
+    // Если темы нет в localStorage, сразу записываем 'dark' для единообразия //
     if (themePref === null) {
         localStorage.setItem('theme', 'dark');
     }

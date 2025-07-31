@@ -18,7 +18,7 @@ const themeConfig: ThemeConfig = {
     moonTitle: 'Переключить на темную тему'
 };
 
-// Класс для управления темами
+// Класс для управления темами //
 class ThemeManager {
     private toggleBtn: HTMLElement | null;
     private config: ThemeConfig;
