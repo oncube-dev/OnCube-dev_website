@@ -200,7 +200,7 @@
 
       border-radius: 40px;
 
-      padding: 3.5rem 2.5rem 2.5rem 2.5rem;
+      padding: 3.5rem 2.5rem 4rem 2.5rem;
 
       background: rgba(0, 0, 0, 0.5);
 
@@ -408,7 +408,7 @@
 
         font-size: 1rem;
 
-        padding: 2rem 1.5rem;
+        padding: 2rem 1.5rem 2.5rem 1.5rem;
 
         border-radius: 24px;
 
@@ -532,7 +532,7 @@
 
       .glass-card.main {
 
-        padding: 1.5rem 1rem;
+        padding: 1.5rem 1rem 2rem 1rem;
 
         border-radius: 20px;
 
@@ -598,6 +598,56 @@
 
     }
 
+    .back-btn {
+      position: absolute;
+      left: 24px;
+      bottom: 16px;
+      z-index: 200;
+      background: rgba(0, 0, 0, 0.4);
+      color: #fff;
+      border: 1.5px solid rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      width: 48px;
+      height: 48px;
+      font-size: 1.7rem;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    }
+
+    .back-btn:hover {
+      background: rgba(0, 0, 0, 0.6);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    @media (max-width: 768px) {
+      .back-btn {
+        width: 44px;
+        height: 44px;
+        font-size: 1.5rem;
+        left: 20px;
+        bottom: 12px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .back-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 1.3rem;
+        left: 16px;
+        bottom: 8px;
+      }
+    }
   </style>
 
 </head>
@@ -610,10 +660,9 @@
 
   <div class="moving-gradient"></div>
 
-  
   <footer class="footer-note">
     <div style="color:#888;">
-    Все права на представленный контент принадлежат <a href="https://github.com/oncube-dev" target="_blank" style="text-decoration:underline; color:#e2b00d"">Oncube</a> ⋅ Сайт сделал <a href="https://youtube.com/@PolimerS" target="_blank" style="color:#e2b00d">PoliSours</a> с любовью 💛
+    Все права на представленный контент принадлежат <a href="https://github.com/oncube-dev" target="_blank" style="text-decoration:underline; color:#e2b00d"">Oncube</a> ⋅ Сайт сделал <a href="https://youtube.com/@PolimerS" target="_blank" style="color:#e2b00d">PoliSours</a> & <a href="https://vobi.bio.link" target="_blank" style="color:#e2b00d">Vobi</a> с любовью 💛
     </div>
     <div style="font-size:0.85em; color:#888; margin-top:13px;">
         [2025-2025] © Open-source project licensed under Apache-2.0. All rights reserved.
@@ -642,6 +691,8 @@
 
 
         <a href="https://t.me/polisour" class="glass-btn">Наш Telegram канал</a>
+
+        <a href="javascript:history.back()" class="back-btn" title="Вернуться назад">⬅</a>
 
       </div>
 
