@@ -72,6 +72,27 @@ body {
     color: #23262f;
 }
 
+.back-btn {
+    position: fixed;
+    left: 24px;
+    bottom: 80px;
+    z-index: 200;
+    background: #23262f;
+    color: #ffe066;
+    border: none;
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    font-size: 1.7rem;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+    transition: background 0.2s, color 0.2s;
+}
+.back-btn:hover {
+    background: #ffe066;
+    color: #23262f;
+}
+
 body {
     background: #f5f5f5;
     color: #23262f;
@@ -120,6 +141,14 @@ body.dark-theme {
     color: #23262f;
 }
 .dark-theme .theme-toggle-btn:hover {
+    background: #23262f;
+    color: #ffe066;
+}
+.dark-theme .back-btn {
+    background: #fff;
+    color: #23262f;
+}
+.dark-theme .back-btn:hover {
     background: #23262f;
     color: #ffe066;
 } 
