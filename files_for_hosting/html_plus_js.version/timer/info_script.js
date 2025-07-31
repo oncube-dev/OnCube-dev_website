@@ -1,3 +1,2 @@
-const API_KEY = 'AIzaSyAKg7uinfJrhSNdbAxGBCN7tRVbaqWF4lY'; // not mine
-const AUTH_PASSWORD = 'PS'; 
+const API_KEY = 'ENTER_YOUR_API_KEY'; 
 const CHANNEL_ID = 'UCACwRQLU0Bq5yxijfnBPRfQ';
