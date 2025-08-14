@@ -114,3 +114,48 @@ document.addEventListener('keydown', function(e) {
         toggleBtn.click();
     }
 });
+
+// Добавляем уведомление о дизайне при первом посещении
+if (!localStorage.getItem('designHintShown')) {
+    setTimeout(() => {
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            z-index: 1001;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            animation: slideIn 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(8px);
+        `;
+        notification.textContent = '✨ Новый дизайн в стиле maintenance';
+        
+        // Добавляем CSS анимацию
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        document.body.appendChild(notification);
+        
+        // Удаляем уведомление через 5 секунд
+        setTimeout(() => {
+            notification.style.animation = 'slideIn 0.3s ease reverse';
+            setTimeout(() => {
+                notification.remove();
+            }, 300);
+        }, 5000);
+        
+        localStorage.setItem('designHintShown', 'true');
+    }, 2000);
+} 
