@@ -1,2 +1,2 @@
-const API_KEY = 'AIzaSyAKg7uinfJrhSNdbAxGBCN7tRVbaqWF4lY'; 
-const CHANNEL_ID = 'UCACwRQLU0Bq5yxijfnBPRfQ';
+const API_KEY = YOUR_API_KEY_HERE; 
+const CHANNEL_ID = CHANNEL_ID_YOU_NEED;
