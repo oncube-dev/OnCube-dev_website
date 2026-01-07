@@ -1,3 +1,0 @@
-const API_KEY = 'AIzaSyBI2VNReDd6lfRP7PyiZUK-NClpMCzkTaE';
-const AUTH_PASSWORD = 'PS'; 
-const CHANNEL_ID = 'UCACwRQLU0Bq5yxijfnBPRfQ';
