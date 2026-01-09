@@ -1,7 +1,7 @@
 // Конфигурация
 const UPDATE_INTERVAL = 600000; // Обновление каждые 10 минут
 const DATA_FILE_PATH = '../resources/city-data.json';
-const DATA_VERSION = 7; // Версия формата данных (увеличено для принудительного пересоздания всех зданий)
+const DATA_VERSION = 8; // Версия формата данных (увеличено для принудительного пересоздания всех зданий с новой логикой органичного размещения)
 const BUILDING_SPACING = 3; // Расстояние между зданиями
 const GRID_SIZE = 20; // Размер сетки для размещения зданий
 const DISTRICT_SIZE = 1000; // Количество подписчиков на один район
@@ -342,6 +342,7 @@ function prepareDataForSave() {
             y: building.position.y,
             z: building.position.z
         },
+        rotation: building.rotation.y || 0, // Сохраняем ротацию по оси Y
         districtNumber: building.userData.districtNumber
     }));
     
@@ -430,6 +431,8 @@ function restoreBuilding(buildingData) {
         buildingData.position.y,
         buildingData.position.z
     );
+    // Восстанавливаем ротацию из сохраненных данных
+    building.rotation.y = buildingData.rotation || 0;
     building.castShadow = true;
     building.receiveShadow = true;
     building.userData = { 
@@ -483,6 +486,11 @@ function createBuilding(type, position) {
     
     const building = new THREE.Mesh(geometry, material);
     building.position.set(position.x, buildingType.size.height / 2, position.z);
+    
+    // Применяем детерминированную ротацию по оси Y для органичного вида
+    // Ротация уже вычислена в updateCity и передана через position.rotation
+    building.rotation.y = position.rotation || 0;
+    
     building.castShadow = true;
     building.receiveShadow = true;
     building.userData = { type, buildingType, districtNumber: position.districtNumber };
@@ -582,7 +590,7 @@ function seededRandom(seed) {
     return ((t ^ t >>> 14) >>> 0) / 4294967296;
 }
 
-// Поиск свободной позиции с проверкой коллизий в пределах района (детерминированный)
+// Поиск свободной позиции с проверкой коллизий в пределах района (органичное размещение)
 function findFreePosition(buildingType, districtNumber, buildingIndex) {
     const minGap = 0.35; // Минимальный зазор между зданиями
     
@@ -596,78 +604,60 @@ function findFreePosition(buildingType, districtNumber, buildingIndex) {
         return buildingDistrict === districtNumber;
     });
     
-    // Используем максимально сложный детерминированный seed для максимального разнообразия
-    // Добавляем множество факторов для первых зданий, чтобы они не были упорядочены
+    // Создаем детерминированный seed для сохранения позиций при одинаковом количестве подписчиков
     const typeHash = buildingType.name.charCodeAt(0) + buildingType.size.width * 7 + buildingType.size.depth * 13;
-    const buildingTypeCode = buildingType.name === 'MICRO' ? 1 : buildingType.name === 'HOUSE' ? 2 : buildingType.name === 'PARK' ? 3 : 4;
+    const baseSeed = districtNumber * 7919 + buildingIndex * 3571 + typeHash * 5527;
+    const seed = Math.abs(baseSeed) % 2147483647;
     
-    // Используем максимально сложную нелинейную формулу seed с множеством множителей
-    // Добавляем максимальную нелинейность через умножение, XOR, сдвиги и модули
-    // Используем разные простые числа для каждого компонента
-    const baseSeed1 = districtNumber * 7919;
-    const baseSeed2 = buildingIndex * 3571;
-    const baseSeed3 = (buildingIndex * buildingIndex) * 997;
-    const baseSeed4 = (buildingIndex * buildingIndex * buildingIndex) * 1237;
+    // Используем более плотную сетку для органичного размещения
+    // Шаг сетки меньше BUILDING_SPACING для более плотной застройки
+    const gridStep = BUILDING_SPACING * 0.6; // Более плотная сетка
+    const maxOffset = BUILDING_SPACING * 0.4; // Максимальное смещение от идеальной позиции сетки
     
-    const typeSeed1 = typeHash * 5527;
-    const typeSeed2 = buildingTypeCode * 3571;
-    const typeSeed3 = (typeHash * buildingTypeCode) * 7919;
+    // Определяем количество ячеек в сетке
+    const gridCells = Math.floor(districtBounds.size / gridStep);
     
-    // Добавляем нелинейные комбинации с XOR и сдвигами
-    const nonLinear1 = (baseSeed1 ^ baseSeed2) << 5;
-    const nonLinear2 = (baseSeed3 ^ baseSeed4) >>> 3;
-    const nonLinear3 = (typeSeed1 ^ typeSeed2) * typeSeed3;
-    const nonLinear4 = (districtNumber << 10) ^ (buildingIndex << 5);
+    // Генерируем позицию на основе индекса здания
+    // Используем разные стратегии для разных типов зданий
+    let baseX, baseZ;
     
-    // Комбинируем все компоненты с максимальной нелинейностью
-    const combinedSeed = (nonLinear1 ^ nonLinear2) + (nonLinear3 ^ nonLinear4) + 
-                         (baseSeed1 * baseSeed2) ^ (typeSeed1 * typeSeed2) +
-                         (districtNumber * buildingIndex * 7919 * 3571);
-    const seed = Math.abs(combinedSeed) % 2147483647;
+    if (buildingType.isPark) {
+        // Парки размещаем более централизованно
+        const parkRadius = seededRandom(seed + 1000) * halfSize * 0.6;
+        const parkAngle = seededRandom(seed + 2000) * Math.PI * 2;
+        baseX = districtBounds.centerX + Math.cos(parkAngle) * parkRadius;
+        baseZ = districtBounds.centerZ + Math.sin(parkAngle) * parkRadius;
+    } else {
+        // Обычные здания размещаем вдоль линий сетки (формирование улиц)
+        // Чередуем размещение вдоль горизонтальных и вертикальных линий
+        const useHorizontalLine = seededRandom(seed + 3000) > 0.5;
+        
+        if (useHorizontalLine) {
+            // Размещаем вдоль горизонтальной линии (улица идет по оси X)
+            const lineZ = districtBounds.centerZ + (seededRandom(seed + 4000) - 0.5) * districtBounds.size * 0.8;
+            const lineX = districtBounds.centerX + (seededRandom(seed + 5000) - 0.5) * districtBounds.size * 0.8;
+            baseX = lineX;
+            baseZ = lineZ;
+        } else {
+            // Размещаем вдоль вертикальной линии (улица идет по оси Z)
+            const lineX = districtBounds.centerX + (seededRandom(seed + 6000) - 0.5) * districtBounds.size * 0.8;
+            const lineZ = districtBounds.centerZ + (seededRandom(seed + 7000) - 0.5) * districtBounds.size * 0.8;
+            baseX = lineX;
+            baseZ = lineZ;
+        }
+    }
     
-    // Генерируем детерминированную позицию с максимальной случайностью
-    // Используем множество независимых случайных значений для максимально естественного распределения
-    // Используем большие смещения в seed для максимальной независимости значений
-    const angle1 = seededRandom(seed + 100000) * Math.PI * 2;
-    const angle2 = seededRandom(seed + 200000) * Math.PI * 2;
-    const angle3 = seededRandom(seed + 300000) * Math.PI * 2;
-    const angle4 = seededRandom(seed + 400000) * Math.PI * 2;
-    const angle5 = seededRandom(seed + 500000) * Math.PI * 2; // Еще больше углов
+    // Добавляем случайное смещение от идеальной позиции для органичности
+    const offsetX = (seededRandom(seed + 8000) - 0.5) * maxOffset * 2;
+    const offsetZ = (seededRandom(seed + 9000) - 0.5) * maxOffset * 2;
     
-    const radius1 = seededRandom(seed + 600000);
-    const radius2 = seededRandom(seed + 700000);
-    const radius3 = seededRandom(seed + 800000);
-    const radius4 = seededRandom(seed + 900000);
-    const radius5 = seededRandom(seed + 1000000); // Еще больше радиусов
+    let position = {
+        x: baseX + offsetX,
+        z: baseZ + offsetZ,
+        rotation: 0 // Ротация будет добавлена в createBuilding
+    };
     
-    // Комбинируем углы и радиусы с нелинейной комбинацией для максимальной случайности
-    // Используем нелинейную комбинацию вместо простого среднего
-    const angle = (angle1 * 0.2 + angle2 * 0.2 + angle3 * 0.2 + angle4 * 0.2 + angle5 * 0.2 + 
-                   Math.sin(angle1) * 0.1 + Math.cos(angle2) * 0.1) % (Math.PI * 2);
-    
-    // Используем нелинейную комбинацию радиусов с разными весами
-    const weightedRadius = (radius1 * 0.15 + radius2 * 0.15 + radius3 * 0.15 + radius4 * 0.15 + radius5 * 0.15 +
-                           Math.sqrt(radius1) * 0.1 + Math.sqrt(radius2) * 0.1 + Math.sqrt(radius3) * 0.1);
-    // Используем более агрессивную степенную функцию для максимальной вариативности
-    const radius = Math.pow(weightedRadius, 0.5) * halfSize * 0.95; // 95% радиуса с максимально нелинейным распределением
-    
-    // Добавляем максимально сильные случайные смещения с максимальной вариативностью
-    const offsetX1 = (seededRandom(seed + 1100000) - 0.5) * 6.0; // Увеличено до 6.0
-    const offsetX2 = (seededRandom(seed + 1200000) - 0.5) * 3.0;
-    const offsetX3 = (seededRandom(seed + 1300000) - 0.5) * 1.5;
-    const offsetZ1 = (seededRandom(seed + 1400000) - 0.5) * 6.0; // Увеличено до 6.0
-    const offsetZ2 = (seededRandom(seed + 1500000) - 0.5) * 3.0;
-    const offsetZ3 = (seededRandom(seed + 1600000) - 0.5) * 1.5;
-    
-    // Комбинируем смещения нелинейно для максимального разнообразия
-    const offsetX = offsetX1 + offsetX2 * Math.sin(offsetX3) + offsetX3;
-    const offsetZ = offsetZ1 + offsetZ2 * Math.cos(offsetZ3) + offsetZ3;
-    
-    const x = districtBounds.centerX + Math.cos(angle) * radius + offsetX;
-    const z = districtBounds.centerZ + Math.sin(angle) * radius + offsetZ;
-    const position = { x, z };
-    
-    // Проверяем коллизию только со зданиями текущего района
+    // Проверяем коллизию со зданиями текущего района
     let hasCollision = false;
     for (let i = 0; i < districtBuildings.length; i++) {
         const existingBuilding = districtBuildings[i];
@@ -683,41 +673,20 @@ function findFreePosition(buildingType, districtNumber, buildingIndex) {
         }
     }
     
-    // Если есть коллизия, пробуем сместить позицию детерминированно
+    // Если есть коллизия, пробуем найти свободную позицию рядом
     if (hasCollision) {
-        for (let offset = 1; offset < 30; offset++) {
-            // Используем более сложную формулу для нового seed при коллизии
-            const newSeed = Math.abs((seed + offset * 3571) ^ (offset * 7919) ^ (offset * offset * 997)) % 2147483647;
-            const newAngle1 = seededRandom(newSeed + 100000) * Math.PI * 2;
-            const newAngle2 = seededRandom(newSeed + 200000) * Math.PI * 2;
-            const newAngle3 = seededRandom(newSeed + 300000) * Math.PI * 2;
-            const newAngle4 = seededRandom(newSeed + 400000) * Math.PI * 2;
-            const newAngle5 = seededRandom(newSeed + 500000) * Math.PI * 2;
+        const searchRadius = BUILDING_SPACING * 2; // Радиус поиска
+        const searchAttempts = 50; // Количество попыток
+        
+        for (let attempt = 1; attempt <= searchAttempts; attempt++) {
+            const attemptSeed = (seed + attempt * 1237) % 2147483647;
             
-            const newRadius1 = seededRandom(newSeed + 600000);
-            const newRadius2 = seededRandom(newSeed + 700000);
-            const newRadius3 = seededRandom(newSeed + 800000);
-            const newRadius4 = seededRandom(newSeed + 900000);
-            const newRadius5 = seededRandom(newSeed + 1000000);
+            // Пробуем позицию в радиусе от исходной
+            const angle = seededRandom(attemptSeed + 10000) * Math.PI * 2;
+            const radius = seededRandom(attemptSeed + 11000) * searchRadius;
             
-            const newAngle = (newAngle1 * 0.2 + newAngle2 * 0.2 + newAngle3 * 0.2 + newAngle4 * 0.2 + newAngle5 * 0.2 + 
-                             Math.sin(newAngle1) * 0.1 + Math.cos(newAngle2) * 0.1) % (Math.PI * 2);
-            const newWeightedRadius = (newRadius1 * 0.15 + newRadius2 * 0.15 + newRadius3 * 0.15 + newRadius4 * 0.15 + newRadius5 * 0.15 +
-                                      Math.sqrt(newRadius1) * 0.1 + Math.sqrt(newRadius2) * 0.1 + Math.sqrt(newRadius3) * 0.1);
-            const newRadius = Math.pow(newWeightedRadius, 0.5) * halfSize * 0.95;
-            
-            const newOffsetX1 = (seededRandom(newSeed + 1100000) - 0.5) * 6.0;
-            const newOffsetX2 = (seededRandom(newSeed + 1200000) - 0.5) * 3.0;
-            const newOffsetX3 = (seededRandom(newSeed + 1300000) - 0.5) * 1.5;
-            const newOffsetZ1 = (seededRandom(newSeed + 1400000) - 0.5) * 6.0;
-            const newOffsetZ2 = (seededRandom(newSeed + 1500000) - 0.5) * 3.0;
-            const newOffsetZ3 = (seededRandom(newSeed + 1600000) - 0.5) * 1.5;
-            
-            const newOffsetX = newOffsetX1 + newOffsetX2 * Math.sin(newOffsetX3) + newOffsetX3;
-            const newOffsetZ = newOffsetZ1 + newOffsetZ2 * Math.cos(newOffsetZ3) + newOffsetZ3;
-            
-            position.x = districtBounds.centerX + Math.cos(newAngle) * newRadius + newOffsetX;
-            position.z = districtBounds.centerZ + Math.sin(newAngle) * newRadius + newOffsetZ;
+            position.x = baseX + Math.cos(angle) * radius + (seededRandom(attemptSeed + 12000) - 0.5) * maxOffset;
+            position.z = baseZ + Math.sin(angle) * radius + (seededRandom(attemptSeed + 13000) - 0.5) * maxOffset;
             
             hasCollision = false;
             for (let i = 0; i < districtBuildings.length; i++) {
@@ -740,38 +709,62 @@ function findFreePosition(buildingType, districtNumber, buildingIndex) {
         }
     }
     
-    // Если все еще есть коллизия, используем систематический поиск
-    const step = BUILDING_SPACING * 0.5;
-    for (let x = districtBounds.centerX - halfSize; x < districtBounds.centerX + halfSize; x += step) {
-        for (let z = districtBounds.centerZ - halfSize; z < districtBounds.centerZ + halfSize; z += step) {
-            const testPosition = { x, z };
-            let testCollision = false;
-            
-            for (let i = 0; i < districtBuildings.length; i++) {
-                const existingBuilding = districtBuildings[i];
-                const existingSize = existingBuilding.userData.buildingType.size;
-                const existingPos = {
-                    x: existingBuilding.position.x,
-                    z: existingBuilding.position.z
-                };
-                
-                if (checkCollision(testPosition, buildingType.size, existingPos, existingSize, minGap)) {
-                    testCollision = true;
-                    break;
-                }
-            }
-            
-            if (!testCollision) {
-                return testPosition;
-            }
+    // Если все еще есть коллизия, используем систематический поиск по более плотной сетке
+    const step = gridStep;
+    const searchRange = Math.floor(districtBounds.size / step);
+    
+    // Перебираем ячейки сетки в случайном порядке (детерминированно)
+    const cells = [];
+    for (let i = 0; i < searchRange; i++) {
+        for (let j = 0; j < searchRange; j++) {
+            cells.push({ i, j });
         }
     }
     
-    // В крайнем случае возвращаем центр района
+    // Перемешиваем ячейки детерминированно
+    const shuffleSeed = seed + 20000;
+    for (let i = cells.length - 1; i > 0; i--) {
+        const j = Math.floor(seededRandom(shuffleSeed + i) * (i + 1));
+        [cells[i], cells[j]] = [cells[j], cells[i]];
+    }
+    
+    // Проверяем ячейки в перемешанном порядке
+    for (const cell of cells) {
+        const testX = districtBounds.centerX - halfSize + cell.i * step + (seededRandom(seed + cell.i * 1000) - 0.5) * maxOffset;
+        const testZ = districtBounds.centerZ - halfSize + cell.j * step + (seededRandom(seed + cell.j * 2000) - 0.5) * maxOffset;
+        const testPosition = { x: testX, z: testZ };
+        
+        let testCollision = false;
+        for (let i = 0; i < districtBuildings.length; i++) {
+            const existingBuilding = districtBuildings[i];
+            const existingSize = existingBuilding.userData.buildingType.size;
+            const existingPos = {
+                x: existingBuilding.position.x,
+                z: existingBuilding.position.z
+            };
+            
+            if (checkCollision(testPosition, buildingType.size, existingPos, existingSize, minGap)) {
+                testCollision = true;
+                break;
+            }
+        }
+        
+        if (!testCollision) {
+            return testPosition;
+        }
+    }
+    
+    // В крайнем случае возвращаем центр района с небольшим смещением
     console.warn(`Не удалось найти свободную позицию для здания в районе ${districtNumber}`);
+    const fallbackRotationSeed = (districtNumber * 7919 + buildingIndex * 3571) % 2147483647;
+    const fallbackRotation = buildingType.isPark 
+        ? (seededRandom(fallbackRotationSeed) - 0.5) * 0.17  // ±5 градусов для парков
+        : (seededRandom(fallbackRotationSeed) - 0.5) * 0.87; // ±25 градусов для обычных зданий
+    
     return {
-        x: districtBounds.centerX,
-        z: districtBounds.centerZ
+        x: districtBounds.centerX + (seededRandom(seed + 30000) - 0.5) * BUILDING_SPACING,
+        z: districtBounds.centerZ + (seededRandom(seed + 40000) - 0.5) * BUILDING_SPACING,
+        rotation: fallbackRotation
     };
 }
 
@@ -906,6 +899,17 @@ function updateCity(subscriberCount) {
             ).length;
             const position = findFreePosition(buildingInfo.buildingType, districtNum, totalBuildingsInDistrict + i);
             position.districtNumber = districtNum;
+            
+            // Генерируем детерминированную ротацию для сохранения при одинаковом количестве подписчиков
+            const rotationSeed = (districtNum * 7919 + (totalBuildingsInDistrict + i) * 3571) % 2147483647;
+            if (buildingInfo.buildingType.isPark) {
+                // Парки почти не поворачиваем (максимум ±5 градусов)
+                position.rotation = (seededRandom(rotationSeed) - 0.5) * 0.17; // ±5 градусов
+            } else {
+                // Обычные здания поворачиваем на ±15-30 градусов
+                position.rotation = (seededRandom(rotationSeed) - 0.5) * 0.87; // ±25 градусов
+            }
+            
             createBuilding(buildingInfo.type, position);
         }
         
@@ -943,15 +947,8 @@ function animate() {
         window.updateCameraMovement();
     }
     
-    // Легкое вращение зданий для живости (опционально)
-    buildings.forEach((building, index) => {
-        if (building.userData.buildingType.isPark) {
-            // Парки не вращаем
-            return;
-        }
-        // Очень медленное покачивание
-        building.rotation.y = Math.sin(Date.now() * 0.0001 + index) * 0.02;
-    });
+    // Убрано покачивание зданий, так как теперь используется постоянная ротация
+    // Ротация сохраняется в данных и не должна изменяться во время анимации
     
     renderer.render(scene, camera);
 }
