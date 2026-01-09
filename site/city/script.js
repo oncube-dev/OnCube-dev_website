@@ -194,19 +194,44 @@ function initScene() {
     
     // Функция переключения видимости окна статистики
     let statsVisible = true;
+    const statsContent = document.getElementById('stats-content');
+    const hiddenIndicator = document.getElementById('hidden-indicator');
+    
     function toggleStatsVisibility() {
-        const statsContent = document.getElementById('stats-content');
-        const hiddenIndicator = document.getElementById('hidden-indicator');
-        
         statsVisible = !statsVisible;
         
         if (statsVisible) {
-            statsContent.style.display = 'block';
-            hiddenIndicator.style.display = 'none';
+            statsContent.classList.remove('hidden');
+            hiddenIndicator.classList.remove('visible');
+            // Убираем pointer-events после завершения анимации
+            setTimeout(() => {
+                hiddenIndicator.style.pointerEvents = 'none';
+            }, 300);
         } else {
-            statsContent.style.display = 'none';
-            hiddenIndicator.style.display = 'block';
+            statsContent.classList.add('hidden');
+            hiddenIndicator.classList.add('visible');
+            hiddenIndicator.style.pointerEvents = 'all';
         }
+    }
+    
+    // Обработчик клика по плашке для показа панели
+    if (hiddenIndicator) {
+        hiddenIndicator.addEventListener('click', () => {
+            if (!statsVisible) {
+                toggleStatsVisibility();
+            }
+        });
+    }
+    
+    // Обработчик клика по кнопке скрытия панели
+    const hidePanelBtn = document.getElementById('hide-panel-btn');
+    if (hidePanelBtn) {
+        hidePanelBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (statsVisible) {
+                toggleStatsVisibility();
+            }
+        });
     }
     
     // Обновление позиции камеры на основе нажатых клавиш
