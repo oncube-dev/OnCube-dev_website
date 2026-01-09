@@ -16,8 +16,7 @@ body {
 .content {
     position: fixed;
     top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
+    left: 20px;
     z-index: 100;
     width: 100%;
     max-width: 500px;
@@ -164,6 +163,7 @@ body {
 @media (max-width: 768px) {
     .content {
         top: 10px;
+        left: 15px;
         padding: 0 15px;
     }
 
@@ -207,6 +207,7 @@ body {
 @media (max-width: 480px) {
     .content {
         top: 5px;
+        left: 10px;
         padding: 0 10px;
     }
 
