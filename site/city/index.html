@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Город подписчиков - OnCube</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="content" id="stats-content">
+        <div class="glass-card stats-card">
+            <h2>Город растет!</h2>
+            <div class="stats-info">
+                <div class="stat-item">
+                    <span class="stat-label">Подписчиков:</span>
+                    <span id="subscriber-count" class="stat-value">Загрузка...</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Зданий в городе:</span>
+                    <span id="building-count" class="stat-value">0</span>
+                </div>
+            </div>
+            <div class="stats-hint">Правый Alt — скрыть/показать</div>
+        </div>
+    </div>
+
+    <div id="hidden-indicator" class="hidden-indicator" style="display: none;">
+        Окно скрыто. Правый Alt — показать
+    </div>
+
+    <div id="canvas-container"></div>
+
+    <button id="back-btn" class="back-btn" title="Вернуться на главную" onclick="window.location.href='/'">⬅</button>
+    
+    <footer class="footer-note">
+        <div style="color:#888;">
+            Все права на представленный контент принадлежат <a href="https://github.com/oncube-dev" target="_blank" style="text-decoration:underline; color:#f59e0b">OnCube</a> ⋅ Сайт сделали <a href="https://youtube.com/@PolimerS" target="_blank" style="color:#f59e0b">PoliSours</a> & <a href="https://vobi.bio.link" target="_blank" style="color:#f59e0b">Vobi</a> с любовью 🧡
+        </div>
+        <div style="font-size:0.85em; color:#888; margin-top:13px; font-style: italic;">
+            [2025-2026] © Source available project licensed under Business Source License 1.1 — Modified Edition. All rights reserved.
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="info_script.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
+
