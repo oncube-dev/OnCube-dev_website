@@ -100,6 +100,17 @@ function initScene() {
     ground.receiveShadow = true;
     scene.add(ground);
     
+    // Сетка на земле
+    const gridSize = 200;
+    const gridDivisions = 50; // Количество делений сетки
+    const gridColorCenter = 0xffffff; // Белый цвет для основных линий
+    const gridColorGrid = 0xffffff; // Белый цвет для линий сетки
+    const gridHelper = new THREE.GridHelper(gridSize, gridDivisions, gridColorCenter, gridColorGrid);
+    gridHelper.material.opacity = 0.3; // Полупрозрачность для более мягкого вида
+    gridHelper.material.transparent = true;
+    gridHelper.position.y = 0.01; // Немного выше земли, чтобы избежать z-fighting
+    scene.add(gridHelper);
+    
     // Управление камерой в стиле FPS (свободное перемещение)
     // Переменные уже объявлены глобально
     
