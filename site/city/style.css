@@ -176,15 +176,16 @@ body {
 }
 
 .hidden-indicator::before {
-    content: '→';
+    content: '⬅';
     font-size: 1.3rem;
     font-weight: bold;
     color: rgba(245, 158, 11, 0.8);
     transition: transform 0.3s ease, color 0.3s ease;
+    transform: scaleX(-1);
 }
 
 .hidden-indicator:hover::before {
-    transform: translateX(4px);
+    transform: scaleX(-1) translateX(4px);
     color: rgba(245, 158, 11, 1);
 }
 
